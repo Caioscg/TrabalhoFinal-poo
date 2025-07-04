@@ -64,12 +64,7 @@ SistemaColetaInteligente/
 
 ### **Compilação e Execução:**
 
-#### **Método 1: VsCode**
-1. Importe o projeto no VsCode
-2. Configure `src/` como source folder
-3. Execute `gui.TelaPrincipal.main()`
-
-#### **Método 2: Linha de Comando do PowerShell**
+#### **Linha de Comando do PowerShell**
 ```bash
 $files = Get-ChildItem -Recurse -Filter *.java -Path src | ForEach-Object { $_.FullName }
 
