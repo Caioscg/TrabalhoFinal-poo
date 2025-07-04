@@ -97,5 +97,5 @@ java -cp bin gui.TelaPrincipal
 
 ## **EQUIPE**
 
-*Nícolas Santana Kruger*
+*Nícolas Santana Kruger* \n
 *Caio Souza Coelho Gonzaga*
