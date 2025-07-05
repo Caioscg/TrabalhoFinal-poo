@@ -1,6 +1,3 @@
-// TelaPrincipal.java (Versão Corrigida)
-package gui;
-
 import servico.CentralControle;
 import servico.SimuladorMovimento;
 import modelo.coleta.*;
@@ -37,8 +34,8 @@ public class TelaPrincipal extends JFrame implements IObserver {
     private void inicializarComponentes() {
         setTitle("🗑️ Sistema de Coleta Inteligente - Cidade Inteligente");
         
-        // Inicializar sistema
-        central = new CentralControle();
+        // SINGLETON: Obter instância única da Central de Controle
+        central = CentralControle.getInstance();
         simulador = new SimuladorMovimento(central.getCaminhoes());
         central.addObserver(this);
         
@@ -60,7 +57,7 @@ public class TelaPrincipal extends JFrame implements IObserver {
         lblStatus = new JLabel("Status: Sistema Desativado");
         lblStatus.setForeground(Color.RED);
         
-        // Registrar observadores
+        // Registrar observadores na instância única
         central.addObserver(painelMapa);
         central.addObserver(painelStatus);
         
@@ -220,12 +217,13 @@ public class TelaPrincipal extends JFrame implements IObserver {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                // CORREÇÃO: Usar getSystemLookAndFeel() corretamente
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
-                // Usar look and feel padrão se houver erro
                 System.out.println("Usando Look and Feel padrão");
             }
+            
+            // SINGLETON: Garantir que a aplicação use a instância única
+            System.out.println("🏙️ Iniciando Sistema de Cidade Inteligente...");
             new TelaPrincipal().setVisible(true);
         });
     }
