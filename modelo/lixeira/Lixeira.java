@@ -1,6 +1,3 @@
-// Lixeira.java (Versão Corrigida)
-package modelo.lixeira;
-
 import java.awt.Color;
 import java.util.Random;
 
@@ -17,7 +14,7 @@ public class Lixeira {
         this.id = "L" + String.format("%03d", contador++);
         this.posicaoX = x;
         this.posicaoY = y;
-        // OTIMIZAÇÃO: Começar com níveis mais variados para demonstração
+        // Começar com níveis mais variados para demonstração
         this.nivelAtual = 30 + new Random().nextInt(60); // 30-90%
         this.tipo = TipoLixeira.values()[new Random().nextInt(TipoLixeira.values().length)];
         this.coletando = false;
@@ -25,14 +22,13 @@ public class Lixeira {
     
     public void simularEnchimento() {
         if (nivelAtual < 95) {
-            // OTIMIZAÇÃO: Enchimento mais rápido para demonstração
-            nivelAtual += new Random().nextInt(8) + 3; // 3-10% por vez
+            // ENCHIMENTO MAIS LENTO: de 3-10% para 1-3% por vez
+            nivelAtual += new Random().nextInt(3) + 1; // 1-3% por vez
             if (nivelAtual > 100) nivelAtual = 100;
         }
     }
     
     public void esvaziar() {
-        // CORREÇÃO: Garantir que a lixeira seja esvaziada corretamente
         System.out.println("Esvaziando lixeira " + id + " (era " + nivelAtual + "%)");
         this.nivelAtual = 0;
         this.coletando = false;
@@ -67,6 +63,6 @@ public class Lixeira {
         }
     }
     public void setNivelAtual(int nivel) { 
-        this.nivelAtual = Math.max(0, Math.min(100, nivel)); // Garantir entre 0-100
+        this.nivelAtual = Math.max(0, Math.min(100, nivel)); 
     }
 }
