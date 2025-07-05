@@ -1,6 +1,3 @@
-// CentralControle.java (Bug Fix Final)
-package servico;
-
 import modelo.lixeira.Lixeira;
 import modelo.caminhao.Caminhao;
 import modelo.coleta.*;
@@ -10,7 +7,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 
+/**
+ * SINGLETON PATTERN - Garante que existe apenas uma instância do controle central
+ * Em uma cidade inteligente real, deve haver apenas um centro de controle
+ */
 public class CentralControle {
+    // SINGLETON: Instância única estática
+    private static CentralControle instance;
+    
     private List<Lixeira> lixeiras;
     private List<Caminhao> caminhoes;
     private IEstrategiaColeta estrategiaAtual;
@@ -20,8 +24,33 @@ public class CentralControle {
     private int coletasRealizadas;
     private double eficienciaMedia;
     
-    public CentralControle() {
+    // SINGLETON: Construtor privado impede criação externa
+    private CentralControle() {
         inicializarSistema();
+    }
+    
+    // SINGLETON: Método público para obter a instância única
+    public static CentralControle getInstance() {
+        if (instance == null) {
+            synchronized (CentralControle.class) {
+                if (instance == null) {
+                    instance = new CentralControle();
+                    System.out.println("🏛️ Central de Controle da Cidade criada (Singleton)");
+                }
+            }
+        }
+        return instance;
+    }
+    
+    // SINGLETON: Método para resetar instância (útil para testes)
+    public static void resetInstance() {
+        synchronized (CentralControle.class) {
+            if (instance != null) {
+                instance.desativarSistema();
+                instance = null;
+                System.out.println("🔄 Central de Controle resetada");
+            }
+        }
     }
     
     private void inicializarSistema() {
@@ -68,12 +97,15 @@ public class CentralControle {
     public void ativarSistema() {
         sistemaAtivo = true;
         timerSimulacao.start();
+        System.out.println("🚀 Sistema da Cidade Ativado pela Central Única");
         notificarObservers("SISTEMA_ATIVADO", null);
     }
     
     public void desativarSistema() {
         sistemaAtivo = false;
-        timerSimulacao.stop();
+        if (timerSimulacao != null) {
+            timerSimulacao.stop();
+        }
         
         for (Caminhao caminhao : caminhoes) {
             caminhao.setEstado(modelo.caminhao.EstadoCaminhao.PARADO);
@@ -84,11 +116,13 @@ public class CentralControle {
             caminhao.setLixeiraAtual(null);
         }
         
+        System.out.println("⏹️ Sistema da Cidade Desativado pela Central Única");
         notificarObservers("SISTEMA_DESATIVADO", null);
     }
     
     public void alterarEstrategia(IEstrategiaColeta novaEstrategia) {
         this.estrategiaAtual = novaEstrategia;
+        System.out.println("🔄 Central alterou estratégia para: " + novaEstrategia.getNome());
         
         for (Caminhao caminhao : caminhoes) {
             for (Lixeira lixeira : caminhao.getRotaAtual()) {
@@ -113,6 +147,7 @@ public class CentralControle {
     
     public void adicionarLixeira(int x, int y) {
         lixeiras.add(new Lixeira(x, y));
+        System.out.println("➕ Central adicionou nova lixeira na posição (" + x + ", " + y + ")");
         notificarObservers("LIXEIRA_ADICIONADA", null);
     }
     
@@ -120,6 +155,7 @@ public class CentralControle {
         for (Lixeira lixeira : lixeiras) {
             lixeira.setNivelAtual(95 + new Random().nextInt(5));
         }
+        System.out.println("🚨 Central declarou EMERGÊNCIA - todas as lixeiras lotadas!");
         notificarObservers("EMERGENCIA_SIMULADA", null);
     }
     
@@ -191,7 +227,6 @@ public class CentralControle {
                     if (caminhao.getLixeiraAtual() != null) {
                         Lixeira lixeiraAtual = caminhao.getLixeiraAtual();
                         
-                        // CORREÇÃO CRÍTICA: Verificar se a lixeira ainda tem lixo
                         if (lixeiraAtual.getNivelAtual() == 0) {
                             System.out.println("⚠️ Lixeira " + lixeiraAtual.getId() + " já está vazia!");
                             pularParaProximaLixeira(caminhao);
@@ -201,14 +236,12 @@ public class CentralControle {
                         System.out.println("🗑️ Coletando lixeira " + lixeiraAtual.getId() + 
                                          " - Nível antes: " + lixeiraAtual.getNivelAtual() + "%");
                         
-                        // CORREÇÃO CRÍTICA: Verificar capacidade ANTES de coletar
                         int nivelLixeira = lixeiraAtual.getNivelAtual();
                         boolean podeColeter = caminhao.getCargaAtual() + nivelLixeira <= caminhao.getCapacidadeMaxima();
                         
                         if (!podeColeter) {
                             System.out.println("🚛💯 Caminhão " + caminhao.getId() + " não tem espaço para " + 
                                              nivelLixeira + "%, retornando à garagem");
-                            // CORREÇÃO: Liberar a lixeira e ir para garagem
                             lixeiraAtual.setColetando(false);
                             limparRotaCaminhao(caminhao);
                             caminhao.setEstado(modelo.caminhao.EstadoCaminhao.RETORNANDO);
@@ -216,21 +249,18 @@ public class CentralControle {
                             break;
                         }
                         
-                        // Realizar a coleta (só se couber)
                         caminhao.coletarLixo(lixeiraAtual);
                         coletasRealizadas++;
                         
                         System.out.println("✅ Lixeira " + lixeiraAtual.getId() + 
                                          " coletada - Nível depois: " + lixeiraAtual.getNivelAtual() + "%");
                         
-                        // CORREÇÃO: Verificar se está cheio APÓS coletar
                         if (caminhao.estaCheio()) {
                             System.out.println("🚛💯 Caminhão " + caminhao.getId() + " ficou cheio, retornando à garagem");
                             limparRotaCaminhao(caminhao);
                             caminhao.setEstado(modelo.caminhao.EstadoCaminhao.RETORNANDO);
                             caminhao.setLixeiraAtual(null);
                         } else {
-                            // Ir para próxima lixeira
                             pularParaProximaLixeira(caminhao);
                         }
                         
@@ -254,7 +284,6 @@ public class CentralControle {
         calcularEficiencia();
     }
     
-    // NOVO MÉTODO: Limpar rota e liberar lixeiras
     private void limparRotaCaminhao(Caminhao caminhao) {
         for (Lixeira lixeira : caminhao.getRotaAtual()) {
             lixeira.setColetando(false);
@@ -269,7 +298,6 @@ public class CentralControle {
             rotaAtualCaminhao.remove(0);
         }
         
-        // CORREÇÃO: Verificar se caminhão está cheio ANTES de continuar
         if (caminhao.estaCheio()) {
             System.out.println("🚛💯 Caminhão " + caminhao.getId() + " está cheio, interrompendo rota");
             limparRotaCaminhao(caminhao);
@@ -325,6 +353,7 @@ public class CentralControle {
     
     public void addObserver(IObserver observer) {
         observers.add(observer);
+        System.out.println("👁️ Observador registrado na Central: " + observer.getClass().getSimpleName());
     }
     
     public void removeObserver(IObserver observer) {
@@ -337,6 +366,7 @@ public class CentralControle {
         }
     }
     
+    // Getters
     public List<Lixeira> getLixeiras() { return lixeiras; }
     public List<Caminhao> getCaminhoes() { return caminhoes; }
     public IEstrategiaColeta getEstrategiaAtual() { return estrategiaAtual; }
