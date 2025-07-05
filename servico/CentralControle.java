@@ -9,10 +9,8 @@ import java.util.*;
 
 /**
  * SINGLETON PATTERN - Garante que existe apenas uma instância do controle central
- * Em uma cidade inteligente real, deve haver apenas um centro de controle
  */
 public class CentralControle {
-    // SINGLETON: Instância única estática
     private static CentralControle instance;
     
     private List<Lixeira> lixeiras;
@@ -24,12 +22,10 @@ public class CentralControle {
     private int coletasRealizadas;
     private double eficienciaMedia;
     
-    // SINGLETON: Construtor privado impede criação externa
     private CentralControle() {
         inicializarSistema();
     }
     
-    // SINGLETON: Método público para obter a instância única
     public static CentralControle getInstance() {
         if (instance == null) {
             synchronized (CentralControle.class) {
@@ -42,7 +38,6 @@ public class CentralControle {
         return instance;
     }
     
-    // SINGLETON: Método para resetar instância (útil para testes)
     public static void resetInstance() {
         synchronized (CentralControle.class) {
             if (instance != null) {
@@ -67,7 +62,8 @@ public class CentralControle {
         caminhoes.add(new Caminhao());
         caminhoes.add(new Caminhao());
         
-        timerSimulacao = new Timer(3000, new ActionListener() {
+        // PREENCHIMENTO MAIS LENTO: de 3000ms para 6000ms (6 segundos)
+        timerSimulacao = new Timer(6000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (sistemaAtivo) {
@@ -160,7 +156,8 @@ public class CentralControle {
     }
     
     public void iniciarSimulacaoLixo() {
-        Timer timerColeta = new Timer(500, new ActionListener() {
+        // MOVIMENTO MAIS RÁPIDO: de 500ms para 300ms
+        Timer timerColeta = new Timer(300, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (sistemaAtivo) {
@@ -173,7 +170,8 @@ public class CentralControle {
     
     private void simularEnchimentoLixeiras() {
         for (Lixeira lixeira : lixeiras) {
-            if (!lixeira.isColetando() && new Random().nextDouble() < 0.4) {
+            // PROBABILIDADE MENOR: de 0.4 para 0.2 (mais lento)
+            if (!lixeira.isColetando() && new Random().nextDouble() < 0.2) {
                 lixeira.simularEnchimento();
             }
         }
